@@ -9,6 +9,7 @@
 //#include "TargetVelPathPlanner.hpp"
 #include "PivotPathPlanner.hpp"
 #include "RRTPlanner.hpp"
+#include "VisPlanner.hpp"
 #include "TargetVelPathPlanner.hpp"
 
 using namespace std;
@@ -31,7 +32,8 @@ std::unique_ptr<SingleRobotPathPlanner> PlannerForCommandType(
     SingleRobotPathPlanner* planner = nullptr;
     switch (type) {
         case MotionCommand::PathTarget:
-            planner = new RRTPlanner(100, 250);
+            //planner = new RRTPlanner(100, 250);
+            planner = new VisPlanner();
             break;
         case MotionCommand::DirectPathTarget:
             planner = new DirectTargetPathPlanner();

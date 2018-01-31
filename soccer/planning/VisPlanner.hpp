@@ -18,10 +18,11 @@
 
 namespace Planning {
 
-struct CubicBezierControlPoints {
+
+struct aCubicBezierControlPoints {
     Geometry2d::Point p0, p1, p2, p3;
 
-    CubicBezierControlPoints(Geometry2d::Point p0, Geometry2d::Point p1,
+    aCubicBezierControlPoints(Geometry2d::Point p0, Geometry2d::Point p1,
                              Geometry2d::Point p2, Geometry2d::Point p3)
         : p0(p0), p1(p1), p2(p2), p3(p3) {}
 };
@@ -40,7 +41,7 @@ public:
     /**
      * Constructor taking in the max iterations the RRT planner should run
      */
-    VisPlanner(int minIterations, int maxIterations);
+    VisPlanner();
 
     /**
      * gets the maximum number of iterations for the RRT algorithm
@@ -128,7 +129,7 @@ protected:
      * velocity and acceleration
      * that estimates speed using the trapezoidal motion heuristic
      */
-    static std::vector<CubicBezierControlPoints> generateCubicBezierPath(
+    static std::vector<aCubicBezierControlPoints> generateCubicBezierPath(
         const std::vector<Geometry2d::Point>& points,
         const MotionConstraints& motionConstraints, Geometry2d::Point vi,
         Geometry2d::Point vf,
@@ -139,7 +140,7 @@ protected:
      * motion constratins
      */
     static std::vector<InterpolatedPath::Entry> generateVelocityPath(
-        const std::vector<CubicBezierControlPoints>& controlPoints,
+        const std::vector<aCubicBezierControlPoints>& controlPoints,
         const MotionConstraints& motionConstraints, Geometry2d::Point vi,
         Geometry2d::Point vf, int interpolations = 40);
 
@@ -147,7 +148,7 @@ protected:
      * Generates a Cubic Bezier Path based on some attempted heuristical Control
      * Point Placement
      */
-    static std::vector<CubicBezierControlPoints> generateNormalCubicBezierPath(
+    static std::vector<aCubicBezierControlPoints> generateNormalCubicBezierPath(
         const std::vector<Geometry2d::Point>& points,
         const MotionConstraints& motionConstraints, Geometry2d::Point vi,
         Geometry2d::Point vf);
@@ -161,6 +162,17 @@ protected:
                                            std::vector<double>& points,
                                            std::vector<double>& ks,
                                            std::vector<double>& ks2);
+
+
+    static float getTime(std::vector<Geometry2d::Point> path, int index,
+              const MotionConstraints& motionConstraints, float startSpeed,
+              float endSpeed);
+    static float getTime(Planning::InterpolatedPath& path, int index,
+              const MotionConstraints& motionConstraints, float startSpeed,
+              float endSpeed);
+
+    static float oneStepLimitAcceleration(float maxAceleration, float d1, float v1,
+                               float c1, float d2, float v2, float c2);
 
     /**
      * Helper method for runRRT(), which creates a vector of points representing

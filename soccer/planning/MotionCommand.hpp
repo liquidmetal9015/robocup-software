@@ -46,7 +46,7 @@ struct EmptyCommand : public MotionCommand {
 
 struct PathTargetCommand : public MotionCommand {
     virtual std::unique_ptr<Planning::MotionCommand> clone() const override {
-        return std::make_unique<PathTargetCommand>(*this);
+       return std::make_unique<PathTargetCommand>(*this);
     }
     explicit PathTargetCommand(const MotionInstant& goal)
         : MotionCommand(MotionCommand::PathTarget), pathGoal(goal){};
@@ -61,6 +61,7 @@ struct WorldVelTargetCommand : public MotionCommand {
     }
     const Geometry2d::Point worldVel;
 };
+
 struct PivotCommand : public MotionCommand {
     explicit PivotCommand(Geometry2d::Point pivotPoint,
                           Geometry2d::Point target, float radius)

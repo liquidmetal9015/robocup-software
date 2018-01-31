@@ -22,10 +22,8 @@ using namespace Geometry2d;
 namespace Planning {
 
 
-VisPlanner::VisPlanner(int minIterations, int maxIterations)
-    : _minIterations(minIterations),
-      _maxIterations(maxIterations),
-      SingleRobotPathPlanner(true) {}
+VisPlanner::VisPlanner()
+    : SingleRobotPathPlanner(true) {}
 
 bool VisPlanner::shouldReplan(const PlanRequest& planRequest,
                               const vector<DynamicObstacle> dynamicObs,
@@ -153,15 +151,15 @@ std::unique_ptr<InterpolatedPath> VisPlanner::generateVisPath(
     ShapeSet obstacles = origional;
     unique_ptr<InterpolatedPath> lastPath;
 
+    
 
 
+    //for (int i = 0; i < tries; i++) {
+        /* Run bi-directional RRT to generate a path.
+        vector<Point> points = new vector<Point>;
+            //runRRT(start, goal, motionConstraints, obstacles, state, shellID);
 
-    for (int i = 0; i < tries; i++) {
-        // Run bi-directional RRT to generate a path.
-        auto points =
-            runRRT(start, goal, motionConstraints, obstacles, state, shellID);
-
-         Check if Planning or optimization failed
+        //Check if Planning or optimization failed
         if (points.size() < 2) {
             debugLog("RRTPlanning Failed");
             break;
@@ -183,11 +181,12 @@ std::unique_ptr<InterpolatedPath> VisPlanner::generateVisPath(
             lastPath = std::move(path);
         } else {
             return std::move(path);
-        }
-    }
+        }*/
+    //}
     // debugLog("Generate Failed 10 times");
-    return lastPath;
+    return NULL;
 }
+
 
 /*
 vector<Point> VisPlanner::runRRT(MotionInstant start, MotionInstant goal,
@@ -247,9 +246,12 @@ vector<Point> VisPlanner::runRRTHelper(
     RRT::SmoothPath(points, *stateSpace);
 
     return points;
-}*/
+}
 
-float getTime(vector<Point> path, int index,
+*/
+
+
+float VisPlanner::getTime(vector<Point> path, int index,
               const MotionConstraints& motionConstraints, float startSpeed,
               float endSpeed) {
     float length = 0;
@@ -264,7 +266,9 @@ float getTime(vector<Point> path, int index,
                                 motionConstraints.maxAcceleration, startSpeed,
                                 endSpeed);
 }
-float getTime(InterpolatedPath& path, int index,
+
+
+float VisPlanner::getTime(InterpolatedPath& path, int index,
               const MotionConstraints& motionConstraints, float startSpeed,
               float endSpeed) {
     return Trapezoidal::getTime(
@@ -272,13 +276,15 @@ float getTime(InterpolatedPath& path, int index,
         motionConstraints.maxAcceleration, startSpeed, endSpeed);
 }
 
+
+
 std::unique_ptr<InterpolatedPath> VisPlanner::generatePath(
     const std::vector<Point>& points, const ShapeSet& obstacles,
     const MotionConstraints& motionConstraints, Point vi, Point vf) {
     return generateCubicBezier(points, obstacles, motionConstraints, vi, vf);
 }
 
-vector<CubicBezierControlPoints> VisPlanner::generateNormalCubicBezierPath(
+vector<aCubicBezierControlPoints> VisPlanner::generateNormalCubicBezierPath(
     const vector<Point>& points, const MotionConstraints& motionConstraints,
     Point vi, Point vf) {
     size_t length = points.size();
@@ -310,7 +316,7 @@ vector<CubicBezierControlPoints> VisPlanner::generateNormalCubicBezierPath(
                                              points[points.size() - 2]).mag() *
                                             directionDistance));
 
-    vector<CubicBezierControlPoints> path;
+    vector<aCubicBezierControlPoints> path;
 
     for (int i = 0; i < curvesNum; i++) {
         Point p0 = points[i];
@@ -322,7 +328,7 @@ vector<CubicBezierControlPoints> VisPlanner::generateNormalCubicBezierPath(
     return path;
 }
 
-vector<CubicBezierControlPoints> VisPlanner::generateCubicBezierPath(
+vector<aCubicBezierControlPoints> VisPlanner::generateCubicBezierPath(
     const vector<Point>& points, const MotionConstraints& motionConstraints,
     Point vi, Point vf, const boost::optional<vector<float>>& times) {
     size_t length = points.size();
@@ -349,7 +355,7 @@ vector<CubicBezierControlPoints> VisPlanner::generateCubicBezierPath(
                 debugThrow(
                     "Something went wrong. Points are too close to each other "
                     "probably");
-                return vector<CubicBezierControlPoints>();
+                return vector<aCubicBezierControlPoints>();
             }
         }
     } else {
@@ -363,7 +369,7 @@ vector<CubicBezierControlPoints> VisPlanner::generateCubicBezierPath(
                 debugThrow(
                     "Something went wrong. Points are too close to each other "
                     "probably");
-                return vector<CubicBezierControlPoints>();
+                return vector<aCubicBezierControlPoints>();
             }
         }
     }
@@ -373,7 +379,7 @@ vector<CubicBezierControlPoints> VisPlanner::generateCubicBezierPath(
     VectorXd solutionY =
         VisPlanner::cubicBezierCalc(vi.y(), vf.y(), pointsY, ks, ks2);
 
-    vector<CubicBezierControlPoints> path;
+    vector<aCubicBezierControlPoints> path;
 
     for (int i = 0; i < curvesNum; i++) {
         Point p0 = points[i];
@@ -385,7 +391,7 @@ vector<CubicBezierControlPoints> VisPlanner::generateCubicBezierPath(
     return path;
 }
 
-float oneStepLimitAcceleration(float maxAceleration, float d1, float v1,
+float VisPlanner::oneStepLimitAcceleration(float maxAceleration, float d1, float v1,
                                float c1, float d2, float v2, float c2) {
     float d = std::abs(d2 - d1);
     float deltaSpeed = v2 - v1;
@@ -419,7 +425,7 @@ float oneStepLimitAcceleration(float maxAceleration, float d1, float v1,
  * Algorithm
  */
 std::vector<InterpolatedPath::Entry> VisPlanner::generateVelocityPath(
-    const std::vector<CubicBezierControlPoints>& controlPoints,
+    const std::vector<aCubicBezierControlPoints>& controlPoints,
     const MotionConstraints& motionConstraints, Point vi, Point vf,
     int interpolations) {
     // Interpolate Through Bezier Path
@@ -430,7 +436,7 @@ std::vector<InterpolatedPath::Entry> VisPlanner::generateVelocityPath(
     const float maxAceleration = motionConstraints.maxAcceleration;
     const float& maxSpeed = motionConstraints.maxSpeed;
 
-    for (const CubicBezierControlPoints& controlPoint : controlPoints) {
+    for (const aCubicBezierControlPoints& controlPoint : controlPoints) {
         Point p0 = controlPoint.p0;
         Point p1 = controlPoint.p1;
         Point p2 = controlPoint.p2;
@@ -485,7 +491,7 @@ std::vector<InterpolatedPath::Entry> VisPlanner::generateVelocityPath(
         }
     }
     // Get last point in Path
-    CubicBezierControlPoints lastControlPoint = controlPoints.back();
+    aCubicBezierControlPoints lastControlPoint = controlPoints.back();
 
     Point p0 = lastControlPoint.p0;
     Point p1 = lastControlPoint.p1;
@@ -579,7 +585,7 @@ std::unique_ptr<Planning::InterpolatedPath> VisPlanner::generateCubicBezier(
         return nullptr;
     }
 
-    vector<CubicBezierControlPoints> controlPoints =
+    vector<aCubicBezierControlPoints> controlPoints =
         generateNormalCubicBezierPath(points, motionConstraints, vi, vf);
 
     vector<InterpolatedPath::Entry> entries = generateVelocityPath(
